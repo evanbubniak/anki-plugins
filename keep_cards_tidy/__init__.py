@@ -4,13 +4,18 @@ from aqt.qt import QAction
 from typing import cast
 from bs4 import BeautifulSoup
 
-back_tags_to_purge = [f"h{i}" for i in range(1, 7)] + ["p", "span"]
+back_tags_to_purge = [f"h{i}" for i in range(1, 7)] + ["p", "span", "font"]
 front_tags_to_purge = ["div", "br"] + back_tags_to_purge
 
 def _remove_attr(soup, attr):
     for tag in soup.findAll(True):
         if tag.attrs.get(attr):
             del tag[attr]
+    return soup
+
+def _remove_all_attrs(soup, tag):
+    for tag in soup.findAll(tag):
+        tag.attrs.clear()
     return soup
 
 def clean_deck() -> None:
@@ -23,6 +28,16 @@ def clean_deck() -> None:
                     note[field_name] = str(_remove_attr(BeautifulSoup(note[field_name], "html.parser"), "style"))
 
             note.flush()
+        # remove attributes from any <font> tags if present
+        for has_font_note_id in mw.col.db.execute(r"select id from notes where flds like '%</font>%'"):
+            note = mw.col.getNote(cast(int, has_font_note_id[0]))
+            for field_name in [item[0] for item in note.items()]:
+                if "</font>" in note[field_name]:
+                    note[field_name] = str(_remove_all_attrs(BeautifulSoup(note[field_name], "html.parser"), "font"))
+                    note[field_name] = note[field_name].replace("<font>", "")
+                    note[field_name] = note[field_name].replace("</font>", "")
+            note.flush()
+
         # remove classes from tags
         for has_class_note_id in mw.col.db.execute(r"select id from notes where flds like '%class=%'"):
             note = mw.col.getNote(cast(int, has_class_note_id[0]))
