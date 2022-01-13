@@ -1,5 +1,5 @@
 # anki-plugins
-This is a repository for scripts I write to make Anki a little easier for me. Currently it considers of one script, titled `keep-cards-tidy`, which is a series of text formatting steps that are run on my Anki deck each time I synchronize it.
+This is a repository for scripts I write to make Anki a little easier for me. Currently it considers of one script, titled `keep_cards_tidy`, which is a series of text formatting steps that are run on my Anki deck each time I synchronize it.
 
 By doing this I get rid of a lot of pesky formatting errors and inconsistent formatting that appears in Anki cards, particularly when you are pasting from the Internet where Anki will preserve HTML tags and CSS even if you just want the plain text.
 
