@@ -18,6 +18,19 @@ def _remove_all_attrs(soup, tag):
         tag.attrs.clear()
     return soup
 
+def convert_danish_formatting():
+    danish_deck_id = mw.col.decks.id_for_name("Danish")
+    for is_neuter_note_id in mw.col.db.execute(f"select notes.id from notes left join cards on notes.id = cards.nid where cards.did={danish_deck_id} and substr(flds, 0, instr(flds, char(31))) like 'et %'"):
+        note = mw.col.getNote(cast(int, is_neuter_note_id[0]))
+        front_side = note.items()[0][0]
+        note[front_side] = note[front_side][3:] + " (n)"
+        note.flush()
+    for is_common_note_id in mw.col.db.execute(f"select notes.id from notes left join cards on notes.id = cards.nid where cards.did={danish_deck_id} and substr(flds, 0, instr(flds, char(31))) like 'en %'"):
+        note = mw.col.getNote(cast(int, is_common_note_id[0]))
+        front_side = note.items()[0][0]
+        note[front_side] = note[front_side][3:] + " (c)"
+        note.flush()   
+
 def clean_deck() -> None:
     if mw is not None and mw.col.db:
         # remove CSS styles from tags so they appear as unformatted text
